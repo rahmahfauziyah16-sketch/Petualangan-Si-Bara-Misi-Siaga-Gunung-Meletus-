@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Petualangan Si Bara: Misi Siaga Gunung Meletus!</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #FF5722;
+    --primary-dark: #D84315;
+    --secondary: #FFB300;
+    --secondary-dark: #FF8F00;
+    --accent: #00ACC1;
+    --accent-dark: #00838F;
+    --success: #43A047;
+    --success-dark: #2E7D32;
+    --danger: #E53935;
+    --bg-sky: #81D4FA;
+    --card-bg: #FFFDF7;
+    --text-dark: #2D3142;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(180deg, #4FC3F7 0%, #B3E5FC 60%, #A5D6A7 60%, #66BB6A 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    color: var(--text-dark);
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-title {
+    font-family: 'Fredoka', cursive, sans-serif;
+  }
+
+  /* Dekorasi Latar Belakang */
+  .bg-clouds {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 50%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .cloud {
+    position: absolute;
+    background: rgba(255,255,255,0.85);
+    border-radius: 50px;
+    animation: floatCloud 25s linear infinite;
+  }
+  .cloud::before, .cloud::after {
+    content: ''; position: absolute; background: inherit; border-radius: 50%;
+  }
+  .c1 { width: 120px; height: 40px; top: 10%; left: -150px; }
+  .c1::before { width: 50px; height: 50px; top: -25px; left: 20px; }
+  .c1::after { width: 40px; height: 40px; top: -15px; left: 60px; }
+  .c2 { width: 150px; height: 45px; top: 25%; left: -200px; animation-duration: 35s; animation-delay: 5s; }
+  .c2::before { width: 65px; height: 65px; top: -30px; left: 25px; }
+  .c2::after { width: 50px; height: 50px; top: -20px; left: 80px; }
+
+  @keyframes floatCloud {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(100vw + 300px)); }
+  }
+
+  /* Kontainer Utama Game (Landscape Friendly) */
+  #game-container {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 1040px;
+    min-height: 620px;
+    background: var(--card-bg);
+    border-radius: 32px;
+    border: 6px solid #FFFFFF;
+    box-shadow: 0 18px 0 rgba(0, 0, 0, 0.12), 0 25px 45px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Header Bar */
+  .top-bar {
+    background: linear-gradient(90deg, #FF7043, #FF5722);
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    border-bottom: 4px solid var(--primary-dark);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.2);
+  }
+
+  .hud-stats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .badge-stat {
+    background: rgba(255,255,255,0.22);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 2px solid rgba(255,255,255,0.4);
+  }
+
+  .btn-icon {
+    background: #FFD54F;
+    color: #5D4037;
+    border: none;
+    border-bottom: 4px solid #FFA000;
+    padding: 6px 12px;
+    border-radius: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: 'Fredoka', sans-serif;
+    transition: transform 0.1s;
+  }
+  .btn-icon:active {
+    transform: translateY(3px);
+    border-bottom-width: 1px;
+  }
+
+  /* Area Layar */
+  .screen {
+    display: none;
+    flex: 1;
+    padding: 20px 28px;
+    flex-direction: column;
+    justify-content: space-between;
+    animation: fadeIn 0.35s ease;
+  }
+  .screen.active {
+    display: flex;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  /* Tombol 3D Kartun */
+  .btn-3d {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 12px 24px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.12s ease;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.2);
+  }
+  .btn-3d:active {
+    transform: translateY(4px);
+  }
+  .btn-3d:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-orange { background: var(--primary); border-bottom: 5px solid var(--primary-dark); }
+  .btn-orange:hover:not(:disabled) { background: #FF7043; }
+  .btn-orange:active:not(:disabled) { border-bottom-width: 1px; }
+
+  .btn-yellow { background: var(--secondary); color: #4E342E; text-shadow: none; border-bottom: 5px solid var(--secondary-dark); }
+  .btn-yellow:hover:not(:disabled) { background: #FFCA28; }
+  .btn-yellow:active:not(:disabled) { border-bottom-width: 1px; }
+
+  .btn-blue { background: var(--accent); border-bottom: 5px solid var(--accent-dark); }
+  .btn-blue:hover:not(:disabled) { background: #26C6DA; }
+  .btn-blue:active:not(:disabled) { border-bottom-width: 1px; }
+
+  .btn-green { background: var(--success); border-bottom: 5px solid var(--success-dark); }
+  .btn-green:hover:not(:disabled) { background: #66BB6A; }
+  .btn-green:active:not(:disabled) { border-bottom-width: 1px; }
+
+  .btn-gray { background: #90A4AE; border-bottom: 5px solid #607D8B; }
+  .btn-gray:hover:not(:disabled) { background: #B0BEC5; }
+
+  /* Maskot Si Bara (SVG Kartun 3D) */
+  .bara-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    background: #FFF3E0;
+    border: 3px solid #FFCC80;
+    border-radius: 24px;
+    padding: 12px 18px;
+    box-shadow: 0 6px 0 #FFE0B2;
+  }
+
+  .bara-avatar {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    animation: bounceBara 2s ease-in-out infinite;
+  }
+
+  @keyframes bounceBara {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-7px) scale(1.03, 0.97); }
+  }
+
+  .speech-bubble {
+    background: white;
+    padding: 12px 18px;
+    border-radius: 18px;
+    border: 2px solid #FFB74D;
+    position: relative;
+    flex: 1;
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+  .speech-bubble::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 10px 12px 10px 0;
+    border-style: solid;
+    border-color: transparent #FFB74D transparent transparent;
+  }
+
+  /* Layar Pembuka (Title Screen) */
+  .hero-layout {
+    display: grid;
+    grid-template-columns: 1.25fr 0.75fr;
+    gap: 22px;
+    align-items: center;
+    flex: 1;
+  }
+
+  .hero-title {
+    font-size: 2.15rem;
+    line-height: 1.15;
+    color: var(--primary-dark);
+    text-shadow: 2px 3px 0 #FFE0B2;
+    margin-bottom: 8px;
+  }
+
+  .hero-subtitle {
+    display: inline-block;
+    background: #FFF8E1;
+    color: #E65100;
+    font-weight: 800;
+    padding: 5px 12px;
+    border-radius: 12px;
+    border: 2px dashed #FFB300;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+  }
+
+  /* Form Identitas & Kode Akses */
+  .form-card {
+    background: white;
+    padding: 16px 18px;
+    border-radius: 22px;
+    border: 3px solid #FFCC80;
+    box-shadow: 0 5px 0 #FFE0B2;
+    margin: 10px 0 14px;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .form-group.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .form-group label {
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #E65100;
+  }
+
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 9px 13px;
+    border-radius: 12px;
+    border: 2.5px solid #CFD8DC;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 0.98rem;
+    color: var(--text-dark);
+    background: #FAFAFA;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    border-color: var(--primary);
+    background: #FFF;
+  }
+
+  .form-error {
+    color: var(--danger);
+    font-weight: 800;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    display: none;
+  }
+  .form-error.show {
+    display: block;
+  }
+
+  /* Peta 5 Misi */
+  .mission-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin: 18px 0;
+  }
+
+  .mission-card {
+    background: white;
+    border-radius: 22px;
+    padding: 16px 12px;
+    text-align: center;
+    border: 4px solid #E0E0E0;
+    box-shadow: 0 7px 0 #E0E0E0;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .mission-card:hover:not(.locked) {
+    transform: translateY(-5px);
+    border-color: var(--secondary);
+    box-shadow: 0 11px 0 var(--secondary-dark);
+  }
+
+  .mission-card.completed {
+    border-color: var(--success);
+    box-shadow: 0 7px 0 var(--success-dark);
+    background: #F1F8E9;
+  }
+
+  .mission-card.locked {
+    opacity: 0.65;
+    cursor: not-allowed;
+    background: #F5F5F5;
+  }
+
+  .mission-num {
+    background: var(--primary);
+    color: white;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    display: inline-block;
+    margin: 0 auto 10px;
+  }
+  .mission-card.completed .mission-num { background: var(--success); }
+  .mission-card.locked .mission-num { background: #9E9E9E; }
+
+  .mission-icon {
+    font-size: 3rem;
+    margin: 8px 0;
+  }
+
+  .mission-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #37474F;
+  }
+
+  .mission-score-tag {
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: #F57C00;
+    background: #FFF3E0;
+    padding: 4px 8px;
+    border-radius: 10px;
+  }
+
+  /* Layout Materi & Game Misi */
+  .content-split {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr;
+    gap: 22px;
+    align-items: center;
+    flex: 1;
+    margin: 14px 0;
+  }
+
+  .visual-box {
+    background: linear-gradient(180deg, #E1F5FE 0%, #FFF9C4 100%);
+    border: 4px solid #81D4FA;
+    border-radius: 24px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 270px;
+    box-shadow: inset 0 4px 10px rgba(0,0,0,0.05);
+  }
+
+  .material-box {
+    background: white;
+    border: 3px solid #FFE082;
+    border-radius: 24px;
+    padding: 20px;
+    box-shadow: 0 6px 0 #FFE082;
+  }
+
+  .material-box h3 {
+    color: var(--primary-dark);
+    font-size: 1.35rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .material-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .material-list li {
+    background: #FFFDE7;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border-left: 5px solid var(--secondary);
+    font-size: 0.96rem;
+    line-height: 1.4;
+  }
+
+  /* Area Permainan Interaktif */
+  .quiz-container {
+    background: white;
+    border: 4px solid #B3E5FC;
+    border-radius: 24px;
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin: 12px 0;
+  }
+
+  .question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .q-pill {
+    background: #E0F7FA;
+    color: #006064;
+    font-weight: 800;
+    padding: 5px 14px;
+    border-radius: 14px;
+    font-size: 0.9rem;
+  }
+
+  .question-text {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.3rem;
+    color: #263238;
+    margin-bottom: 16px;
+    line-height: 1.35;
+  }
+
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .option-btn {
+    background: #F8F9FA;
+    border: 3px solid #CFD8DC;
+    border-bottom: 6px solid #B0BEC5;
+    border-radius: 18px;
+    padding: 14px 16px;
+    text-align: left;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #37474F;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    background: #FFF8E1;
+    border-color: #FFB300;
+    border-bottom-color: #FF8F00;
+    transform: translateY(-2px);
+  }
+
+  .option-btn.correct {
+    background: #E8F5E9 !important;
+    border-color: #43A047 !important;
+    border-bottom-color: #2E7D32 !important;
+    color: #1B5E20 !important;
+  }
+
+  .option-btn.wrong {
+    background: #FFEBEE !important;
+    border-color: #E53935 !important;
+    border-bottom-color: #C62828 !important;
+    color: #B71C1C !important;
+  }
+
+  .option-letter {
+    background: #ECEFF1;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* Game Mencocokkan */
+  .match-board {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 10px 0;
+  }
+  .match-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .match-item {
+    background: #FFFDE7;
+    border: 3px solid #FFE082;
+    border-bottom: 5px solid #FFD54F;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .match-item.selected {
+    background: #E1F5FE;
+    border-color: #039BE5;
+    border-bottom-color: #0277BD;
+    transform: scale(1.02);
+  }
+  .match-item.matched {
+    background: #E8F5E9;
+    border-color: #43A047;
+    border-bottom-color: #2E7D32;
+    color: #2E7D32;
+    cursor: default;
+    opacity: 0.85;
+  }
+
+  /* Game Pilih Isi Tas Darurat */
+  .bag-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .bag-item {
+    background: #F5F5F5;
+    border: 3px solid #CFD8DC;
+    border-bottom: 5px solid #B0BEC5;
+    border-radius: 18px;
+    padding: 12px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .bag-item:hover {
+    transform: translateY(-3px);
+  }
+  .bag-item.picked-good {
+    background: #E8F5E9;
+    border-color: #43A047;
+    border-bottom-color: #2E7D32;
+  }
+  .bag-item.picked-bad {
+    background: #FFEBEE;
+    border-color: #E53935;
+    border-bottom-color: #C62828;
+  }
+
+  /* Umpan Balik Banner */
+  .feedback-box {
+    margin-top: 14px;
+    padding: 12px 18px;
+    border-radius: 16px;
+    font-weight: 700;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    animation: fadeIn 0.25s ease;
+  }
+  .feedback-box.show { display: flex; }
+  .feedback-box.good { background: #E8F5E9; border: 3px solid #66BB6A; color: #1B5E20; }
+  .feedback-box.bad { background: #FFEBEE; border: 3px solid #EF5350; color: #B71C1C; }
+
+  /* Footer Navigasi */
+  .nav-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 2px dashed #ECEFF1;
+  }
+
+  /* Sertifikat Kelulusan */
+  .certificate {
+    background: linear-gradient(135deg, #FFFDF7 0%, #FFF8E1 100%);
+    border: 8px double #FFB300;
+    border-radius: 24px;
+    padding: 22px 30px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .cert-badge {
+    font-size: 3rem;
+    margin-bottom: 4px;
+  }
+  .cert-title {
+    font-size: 1.95rem;
+    color: #D84315;
+    letter-spacing: 1px;
+  }
+  .cert-name {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 2rem;
+    color: #00838F;
+    border-bottom: 3px dashed #FFB300;
+    display: inline-block;
+    padding: 4px 24px;
+    margin: 8px 0 4px;
+  }
+  .cert-meta {
+    font-weight: 800;
+    color: #5D4037;
+    font-size: 0.98rem;
+    margin-bottom: 8px;
+  }
+  .cert-stars {
+    font-size: 1.9rem;
+    margin: 6px 0;
+  }
+
+  /* Animasi Gunung Meletus SVG */
+  @keyframes lavaPulse {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(1.08); }
+  }
+  @keyframes smokeRise {
+    0% { transform: translateY(0) scale(0.9); opacity: 0.85; }
+    100% { transform: translateY(-22px) scale(1.25); opacity: 0.2; }
+  }
+  .anim-smoke { animation: smokeRise 2.5s infinite ease-out; transform-origin: center; }
+  .anim-lava { animation: lavaPulse 1.5s infinite ease-in-out; transform-origin: bottom; }
+
+  /* Modal Petunjuk */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-card {
+    background: white;
+    border-radius: 28px;
+    border: 5px solid #FFB300;
+    max-width: 560px;
+    width: 100%;
+    padding: 24px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+  }
+
+  @media (max-width: 820px) {
+    .hero-layout, .content-split, .form-grid { grid-template-columns: 1fr; }
+    .form-group.full-width { grid-column: auto; }
+    .mission-grid { grid-template-columns: repeat(2, 1fr); }
+    .options-grid { grid-template-columns: 1fr; }
+    .bag-grid { grid-template-columns: repeat(2, 1fr); }
+    .hero-title { font-size: 1.85rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-clouds">
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+</div>
+
+<div id="game-container">
+  <!-- TOP HUD BAR -->
+  <div class="top-bar">
+    <div class="brand">
+      <span>🌋</span>
+      <span>PETUALANGAN SI BARA</span>
+    </div>
+    <div class="hud-stats">
+      <div class="badge-stat">👤 <span id="hud-name">Penjelajah Cilik</span></div>
+      <div class="badge-stat" id="hud-class-absen" style="display:none;">🏫 <span id="hud-info">-</span></div>
+      <div class="badge-stat">⭐ Poin: <span id="hud-score">0</span>/100</div>
+      <button class="btn-icon" onclick="toggleHelp(true)">❓ Petunjuk</button>
+      <button class="btn-icon" id="btn-sound" onclick="toggleSound()">🔊 Suara: ON</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 1: HALAMAN PEMBUKA & FORM IDENTITAS -->
+  <div id="screen-home" class="screen active">
+    <div class="hero-layout">
+      <div>
+        <div class="hero-subtitle">📚 IPAS Kelas V SD • Bencana Alam Gunung Meletus</div>
+        <h1 class="hero-title">PETUALANGAN SI BARA:<br>MISI SIAGA GUNUNG MELETUS!</h1>
+
+        <div class="form-card">
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="student-name">1. Nama Lengkap Siswa</label>
+              <input type="text" id="student-name" placeholder="Contoh: Rahmah Fauziyah" maxlength="40">
+            </div>
+
+            <div class="form-group">
+              <label for="student-class">2. Kelas</label>
+              <select id="student-class">
+                <option value="">-- Pilih Kelas --</option>
+                <option value="Kelas V A">Kelas V A</option>
+                <option value="Kelas V B">Kelas V B</option>
+                <option value="Kelas V C">Kelas V C</option>
+                <option value="Kelas V D">Kelas V D</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="student-absen">3. Nomor Absen</label>
+              <input type="number" id="student-absen" placeholder="Contoh: 12" min="1" max="60">
+            </div>
+
+            <div class="form-group full-width">
+              <label for="access-code">4. Kode Akses dari Guru</label>
+              <input type="text" id="access-code" placeholder="Masukkan kode akses dari guru (contoh: ipas5)" maxlength="20">
+            </div>
+          </div>
+          <div class="form-error" id="form-error">⚠️ Lengkapi Nama, Kelas, Nomor Absen, dan Kode Akses yang valid ya!</div>
+        </div>
+
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn-3d btn-orange" onclick="startGame()">🚀 Mulai Petualangan!</button>
+          <button class="btn-3d btn-blue" onclick="toggleHelp(true)">📖 Cara Bermain</button>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
+        <svg viewBox="0 0 340 260" width="300" height="230">
+          <defs>
+            <radialGradient id="baraGrad" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#FFEE58"/>
+              <stop offset="45%" stop-color="#FF9800"/>
+              <stop offset="100%" stop-color="#E65100"/>
+            </radialGradient>
+            <linearGradient id="volcanoGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#6D4C41"/>
+              <stop offset="100%" stop-color="#3E2723"/>
+            </linearGradient>
+          </defs>
+          <g class="anim-smoke">
+            <circle cx="135" cy="52" r="22" fill="#ECEFF1"/>
+            <circle cx="160" cy="40" r="28" fill="#FFFFFF"/>
+            <circle cx="185" cy="55" r="20" fill="#CFD8DC"/>
+          </g>
+          <path d="M30 240 L115 85 Q145 75 175 85 L260 240 Z" fill="url(#volcanoGrad)" stroke="#271814" stroke-width="4" stroke-linejoin="round"/>
+          <path class="anim-lava" d="M113 88 Q145 75 177 88 L192 125 Q180 138 172 122 Q162 145 150 124 Q138 148 128 122 Q115 135 103 120 Z" fill="#FF5722" stroke="#BF360C" stroke-width="3"/>
+          <path d="M122 86 Q145 78 168 86 L160 105 Q145 98 130 105 Z" fill="#FFCA28"/>
+          <ellipse cx="145" cy="242" rx="135" ry="15" fill="#66BB6A"/>
+
+          <g transform="translate(215, 110)" class="bara-avatar">
+            <circle cx="55" cy="75" r="52" fill="#FFF59D" opacity="0.5"/>
+            <path d="M55 8 C55 8 102 58 102 92 C102 120 81 138 55 138 C29 138 8 120 8 92 C8 58 55 8 55 8 Z" fill="url(#baraGrad)" stroke="#BF360C" stroke-width="4"/>
+            <ellipse cx="34" cy="70" rx="7" ry="14" transform="rotate(-20 34 70)" fill="#FFF9C4" opacity="0.8"/>
+            <circle cx="40" cy="88" r="10" fill="#FFFFFF"/>
+            <circle cx="70" cy="88" r="10" fill="#FFFFFF"/>
+            <circle cx="42" cy="88" r="5.5" fill="#212121"/>
+            <circle cx="72" cy="88" r="5.5" fill="#212121"/>
+            <circle cx="44" cy="86" r="2" fill="#FFFFFF"/>
+            <circle cx="74" cy="86" r="2" fill="#FFFFFF"/>
+            <ellipse cx="27" cy="100" rx="6" ry="4" fill="#FF5252" opacity="0.7"/>
+            <ellipse cx="83" cy="100" rx="6" ry="4" fill="#FF5252" opacity="0.7"/>
+            <path d="M43 105 Q55 118 67 105 Z" fill="#B71C1C" stroke="#4E342E" stroke-width="2"/>
+            <path d="M12 95 Q-6 82 2 70" fill="none" stroke="#E65100" stroke-width="6" stroke-linecap="round"/>
+            <path d="M98 95 Q116 82 108 70" fill="none" stroke="#E65100" stroke-width="6" stroke-linecap="round"/>
+          </g>
+        </svg>
+
+        <div class="bara-wrapper" style="width: 100%;">
+          <div class="speech-bubble">
+            <strong>Halo, teman! Aku Si Bara! 🔥</strong><br>
+            Isi data dirimu dan kode akses dari guru (<strong>ipas5</strong>) lalu kumpulkan <strong>100 Poin</strong>!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: PETA 5 MISI -->
+  <div id="screen-map" class="screen">
+    <div class="bara-wrapper">
+      <div id="map-bara-icon" class="bara-avatar"></div>
+      <div class="speech-bubble" id="map-dialogue">
+        Pilih misi yang sudah terbuka di bawah ini! Selesaikan secara berurutan dari <strong>Misi 1 sampai Misi 5</strong> ya!
+      </div>
+    </div>
+
+    <div class="mission-grid" id="mission-cards-container"></div>
+
+    <div class="nav-footer">
+      <button class="btn-3d btn-gray" onclick="goScreen('screen-home')">⬅️ Ganti Data / Kembali</button>
+      <div style="font-weight: 800; color: #546E7A;">
+        Kemajuan Misi: <span id="progress-text">0 / 5 Selesai</span>
+      </div>
+      <button class="btn-3d btn-green" id="btn-to-cert" onclick="showCertificate()" disabled>🏆 Lihat Sertifikat</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: MATERI SINGKAT MISI -->
+  <div id="screen-lesson" class="screen">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <span class="q-pill" id="lesson-badge">MISI 1</span>
+      <h2 id="lesson-title" style="color: var(--primary-dark); font-size: 1.55rem;">Kenali Gunung Berapi</h2>
+      <span style="font-weight: 800; color: #00838F;">📖 Tahap Belajar</span>
+    </div>
+
+    <div class="content-split">
+      <div class="visual-box" id="lesson-visual"></div>
+      <div class="material-box">
+        <h3>💡 Catatan Penting Si Bara:</h3>
+        <ul class="material-list" id="lesson-points"></ul>
+      </div>
+    </div>
+
+    <div class="nav-footer">
+      <button class="btn-3d btn-gray" onclick="goScreen('screen-map')">🗺️ Peta Misi</button>
+      <button class="btn-3d btn-orange" onclick="startMissionQuiz()">🎮 Mulai Tantangan Misi! ➡️</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: TANTANGAN INTERAKTIF MISI -->
+  <div id="screen-quiz" class="screen">
+    <div class="bara-wrapper" style="padding: 10px 16px;">
+      <div id="quiz-bara-icon" class="bara-avatar" style="width: 65px; height: 65px;"></div>
+      <div class="speech-bubble" id="quiz-bara-msg" style="font-size: 0.98rem;">
+        Ayo jawab tantangan ini dengan teliti! Kamu pasti bisa!
+      </div>
+    </div>
+
+    <div class="quiz-container">
+      <div>
+        <div class="question-header">
+          <span class="q-pill" id="quiz-mission-label">Misi 1 • Soal 1/2</span>
+          <span class="badge-stat" style="background: #FFF3E0; color: #E65100; border-color: #FFCC80;">
+            Poin Misi: <span id="mission-live-score">0</span>/20
+          </span>
+        </div>
+        <div class="question-text" id="quiz-question-text">Pertanyaan akan muncul di sini...</div>
+        <div id="quiz-interactive-area"></div>
+      </div>
+
+      <div class="feedback-box" id="quiz-feedback">
+        <span id="feedback-text">Hebat! Jawabanmu tepat!</span>
+        <button class="btn-3d btn-blue" id="btn-next-question" onclick="nextQuestion()">Lanjut ➡️</button>
+      </div>
+    </div>
+
+    <div class="nav-footer">
+      <button class="btn-3d btn-gray" onclick="goScreen('screen-lesson')">⬅️ Baca Materi Lagi</button>
+      <span style="font-size: 0.9rem; font-weight: 700; color: #78909C;">Setiap misi bernilai 20 poin!</span>
+    </div>
+  </div>
+
+  <!-- SCREEN 5: HALAMAN HASIL AKHIR & SERTIFIKAT -->
+  <div id="screen-certificate" class="screen">
+    <div class="certificate">
+      <div class="cert-badge">🏆🌋🎖️</div>
+      <h2 class="cert-title">SERTIFIKAT PENJELAJAH SIAGA</h2>
+      <p style="font-weight: 700; color: #5D4037; margin-top: 4px;">Diberikan dengan bangga oleh Si Bara kepada:</p>
+      <div class="cert-name" id="cert-player-name">Rahmah Fauziyah</div>
+      <div class="cert-meta" id="cert-student-meta">Kelas V A • No. Absen 12</div>
+      <p style="font-size: 0.98rem; line-height: 1.45; max-width: 600px; margin: 0 auto; color: #37474F;">
+        Telah berhasil menyelesaikan seluruh <strong>5 Misi Petualangan Siaga Gunung Meletus</strong> pada mata pelajaran IPAS Kelas V SD dengan penuh semangat dan keberanian!
+      </p>
+      <div class="cert-stars" id="cert-stars">⭐⭐⭐⭐⭐</div>
+      <div style="display: flex; justify-content: center; gap: 18px; margin-top: 8px; flex-wrap: wrap;">
+        <div class="badge-stat" style="background: #FFF3E0; color: #E65100; border-color: #FFB74D; font-size: 1.05rem;">
+          Total Poin Akhir: <span id="cert-total-score">0</span> / 100
+        </div>
+        <div class="badge-stat" style="background: #E8F5E9; color: #2E7D32; border-color: #81C784; font-size: 1.05rem;">
+          Predikat: <span id="cert-rank">Pahlawan Siaga Utama</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-footer" style="margin-top: 12px;">
+      <button class="btn-3d btn-gray" onclick="goScreen('screen-map')">🗺️ Kembali ke Peta Misi</button>
+      <button class="btn-3d btn-yellow" onclick="window.print()">🖨️ Cetak / Simpan Sertifikat</button>
+      <button class="btn-3d btn-orange" onclick="resetGame()">🔄 Main Lagi dari Awal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PETUNJUK PERMAINAN -->
+<div class="modal-overlay" id="help-modal">
+  <div class="modal-card">
+    <h2 style="color: var(--primary-dark); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+      🧭 Petunjuk Petualangan Si Bara
+    </h2>
+    <ul class="material-list" style="margin-bottom: 18px;">
+      <li><strong>1. Isi Data & Kode Akses:</strong> Tulis Nama Lengkap, pilih Kelas, isi Nomor Absen, dan masukkan Kode Akses dari Guru (<strong>ipas5</strong>).</li>
+      <li><strong>2. Selesaikan 5 Misi Berurutan:</strong> Setiap misi bernilai <strong>20 poin</strong> (total maksimal <strong>100 poin</strong>).</li>
+      <li><strong>3. Ragam Permainan:</strong> Kuis pilihan ganda, mencocokkan istilah, tebak benar/salah, dan memilih isi tas darurat.</li>
+      <li><strong>4. Raih Sertifikat:</strong> Selesaikan semua misi untuk membuka <strong>Sertifikat Penjelajah Siaga</strong>!</li>
+    </ul>
+    <div style="text-align: right;">
+      <button class="btn-3d btn-orange" onclick="toggleHelp(false)">👍 Siap Mengerti!</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================= KONFIGURASI KODE AKSES GURU =================
+const VALID_ACCESS_CODES = ['IPAS5'];
+
+// ================= AUDIO ENGINE SEDERHANA (WEB AUDIO API) =================
+let soundEnabled = true;
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playTone(freq, type, duration, vol = 0.12) {
+  if (!soundEnabled) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+  gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + duration);
+}
+
+function sfxClick() { playTone(520, 'sine', 0.1, 0.1); }
+function sfxCorrect() {
+  playTone(523.25, 'triangle', 0.15, 0.15);
+  setTimeout(() => playTone(659.25, 'triangle', 0.15, 0.15), 100);
+  setTimeout(() => playTone(783.99, 'triangle', 0.25, 0.15), 200);
+}
+function sfxWrong() {
+  playTone(240, 'sawtooth', 0.2, 0.1);
+  setTimeout(() => playTone(190, 'sawtooth', 0.25, 0.1), 140);
+}
+function sfxWin() {
+  [523, 659, 784, 1046].forEach((f, i) => {
+    setTimeout(() => playTone(f, 'triangle', 0.25, 0.15), i * 120);
+  });
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  document.getElementById('btn-sound').textContent = soundEnabled ? '🔊 Suara: ON' : '🔇 Suara: OFF';
+}
+
+// ================= SVG MASKOT SI BARA KECIL =================
+function getBaraSVG(mood = 'happy') {
+  const mouth = mood === 'happy'
+    ? '<path d="M43 105 Q55 118 67 105 Z" fill="#B71C1C" stroke="#4E342E" stroke-width="2"/>'
+    : mood === 'surprised'
+    ? '<circle cx="55" cy="108" r="7" fill="#B71C1C" stroke="#4E342E" stroke-width="2"/>'
+    : '<path d="M45 112 Q55 104 65 112" fill="none" stroke="#4E342E" stroke-width="3" stroke-linecap="round"/>';
+
+  return `
+  <svg viewBox="0 0 110 145" width="100%" height="100%">
+    <defs>
+      <radialGradient id="bGradSmall" cx="35%" cy="30%" r="70%">
+        <stop offset="0%" stop-color="#FFEE58"/>
+        <stop offset="45%" stop-color="#FF9800"/>
+        <stop offset="100%" stop-color="#E65100"/>
+      </radialGradient>
+    </defs>
+    <path d="M55 8 C55 8 102 58 102 92 C102 120 81 138 55 138 C29 138 8 120 8 92 C8 58 55 8 55 8 Z" fill="url(#bGradSmall)" stroke="#BF360C" stroke-width="4"/>
+    <ellipse cx="34" cy="70" rx="6" ry="12" transform="rotate(-20 34 70)" fill="#FFF9C4" opacity="0.8"/>
+    <circle cx="40" cy="88" r="10" fill="#FFFFFF"/>
+    <circle cx="70" cy="88" r="10" fill="#FFFFFF"/>
+    <circle cx="42" cy="88" r="5.5" fill="#212121"/>
+    <circle cx="72" cy="88" r="5.5" fill="#212121"/>
+    <circle cx="44" cy="86" r="2" fill="#FFFFFF"/>
+    <circle cx="74" cy="86" r="2" fill="#FFFFFF"/>
+    <ellipse cx="27" cy="100" rx="6" ry="4" fill="#FF5252" opacity="0.7"/>
+    <ellipse cx="83" cy="100" rx="6" ry="4" fill="#FF5252" opacity="0.7"/>
+    ${mouth}
+  </svg>`;
+}
+
+// ================= DATA MATERI & SOAL 5 MISI (MASING-MASING 20 POIN) =================
+const missionsData = [
+  {
+    id: 1,
+    title: "Kenali Gunung Berapi",
+    icon: "🌋",
+    visualSVG: `
+      <svg viewBox="0 0 320 230" width="100%" height="220">
+        <g class="anim-smoke">
+          <circle cx="150" cy="30" r="16" fill="#CFD8DC"/>
+          <circle cx="170" cy="24" r="20" fill="#ECEFF1"/>
+          <circle cx="190" cy="32" r="15" fill="#B0BEC5"/>
+        </g>
+        <polygon points="40,210 130,65 190,65 280,210" fill="#6D4C41" stroke="#3E2723" stroke-width="3"/>
+        <ellipse cx="160" cy="195" rx="45" ry="20" fill="#FF3D00"/>
+        <rect x="148" y="65" width="24" height="125" fill="#FF5722"/>
+        <path d="M130 65 L105 115 L120 112 L138 75 Z" fill="#FF9100"/>
+        <path d="M190 65 L215 115 L200 112 L182 75 Z" fill="#FF9100"/>
+        <text x="205" y="32" font-size="12" font-weight="bold" fill="#37474F">☁️ Asap Vulkanik</text>
+        <text x="55" y="68" font-size="12" font-weight="bold" fill="#D84315">🕳️ Kawah</text>
+        <text x="218" y="118" font-size="12" font-weight="bold" fill="#E65100">🔥 Lava</text>
+        <text x="128" y="200" font-size="12" font-weight="bold" fill="#FFF">🌡️ Magma</text>
+      </svg>`,
+    points: [
+      "<strong>Magma:</strong> Batuan cair yang sangat panas di dalam perut bumi (dapur magma).",
+      "<strong>Kawah:</strong> Lubang besar di puncak gunung tempat keluarnya material letusan.",
+      "<strong>Lava:</strong> Magma yang sudah berhasil keluar dan mengalir ke permukaan bumi.",
+      "<strong>Asap Vulkanik:</strong> Kepulan gas dan abu halus yang keluar dari kawah gunung."
+    ],
+    questions: [
+      {
+        type: "mcq",
+        pts: 10,
+        question: "Cairan batuan sangat panas yang masih berada di dalam perut bumi disebut...",
+        options: ["Lava", "Magma", "Lahar", "Kawah"],
+        answer: 1,
+        explanation: "Tepat! Saat masih di dalam perut bumi namanya Magma, jika sudah keluar namanya Lava."
+      },
+      {
+        type: "match",
+        pts: 10,
+        question: "Cocokkan bagian gunung berapi di sebelah kiri dengan artinya di sebelah kanan!",
+        pairs: [
+          { left: "🕳️ Kawah", right: "Lubang di puncak gunung" },
+          { left: "🔥 Lava", right: "Magma yang keluar ke permukaan" },
+          { left: "☁️ Asap Vulkanik", right: "Kepulan gas dan abu dari kawah" }
+        ],
+        explanation: "Luar biasa! Kamu sudah hafal semua bagian gunung berapi!"
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: "Rahasia Letusan",
+    icon: "💥",
+    visualSVG: `
+      <svg viewBox="0 0 320 230" width="100%" height="220">
+        <polygon points="50,210 135,70 185,70 270,210" fill="#5D4037"/>
+        <ellipse cx="160" cy="185" rx="52" ry="26" fill="#D50000"/>
+        <ellipse cx="160" cy="185" rx="35" ry="15" fill="#FFAB00"/>
+        <rect x="150" y="65" width="20" height="115" fill="#FF3D00"/>
+        <path d="M160 155 L160 95" stroke="#FFF" stroke-width="5" stroke-linecap="round"/>
+        <polygon points="160,82 148,100 172,100" fill="#FFF"/>
+        <text x="65" y="45" font-size="13" font-weight="bold" fill="#BF360C">⬆️ Tekanan Gas & Magma Mendorong Kuat!</text>
+      </svg>`,
+    points: [
+      "<strong>Panas Perut Bumi:</strong> Di dalam bumi suhunya sangat tinggi sehingga batuan meleleh menjadi magma.",
+      "<strong>Tekanan Gas Tinggi:</strong> Magma mengandung banyak gas yang terus mendorong ke atas.",
+      "<strong>Dorongan ke Permukaan:</strong> Seperti botol soda yang dikocok, tekanan yang terlalu kuat mendorong magma keluar lewat kawah sehingga terjadilah letusan!"
+    ],
+    questions: [
+      {
+        type: "mcq",
+        pts: 10,
+        question: "Apa penyebab utama terjadinya gunung meletus?",
+        options: [
+          "Hujan lebat yang membasahi puncak gunung",
+          "Tekanan gas dan magma yang sangat kuat mendorong ke atas",
+          "Angin kencang yang bertiup di lereng gunung",
+          "Banyaknya pohon yang ditebang di hutan"
+        ],
+        answer: 1,
+        explanation: "Betul! Tekanan gas dan magma dari dalam perut bumi mendorong material keluar lewat kawah."
+      },
+      {
+        type: "tf",
+        pts: 10,
+        question: "Benar atau Salah: Gunung meletus terjadi karena tekanan gas di dalam dapur magma terlalu tinggi sehingga mendorong magma keluar.",
+        options: ["✅ Benar", "❌ Salah"],
+        answer: 0,
+        explanation: "Tepat! Mirip seperti botol minuman bersoda yang dikocok lalu dibuka tutupnya."
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: "Waspada Sebelum Meletus",
+    icon: "🚨",
+    visualSVG: `
+      <svg viewBox="0 0 320 230" width="100%" height="220">
+        <polygon points="70,205 145,75 185,75 260,205" fill="#795548"/>
+        <path class="anim-smoke" d="M145 70 Q130 40 155 25 Q185 20 185 50 Q200 60 180 72 Z" fill="#90A4AE"/>
+        <rect x="30" y="55" width="22" height="85" rx="11" fill="#FFF" stroke="#E53935" stroke-width="3"/>
+        <circle cx="41" cy="135" r="14" fill="#E53935"/>
+        <rect x="37" y="70" width="8" height="65" fill="#E53935"/>
+        <text x="15" y="45" font-size="11" font-weight="bold" fill="#C62828">🌡️ Suhu Naik</text>
+        <text x="205" y="160" font-size="26">🦌🐇</text>
+        <text x="190" y="182" font-size="11" font-weight="bold" fill="#2E7D32">Hewan Turun Gunung</text>
+        <text x="45" y="185" font-size="11" font-weight="bold" fill="#4E342E">〰️ Gempa Vulkanik</text>
+      </svg>`,
+    points: [
+      "<strong>Suhu Sekitar Naik:</strong> Udara di sekitar gunung terasa lebih panas dan mata air mengering.",
+      "<strong>Sering Terjadi Gempa:</strong> Terasa getaran-getaran kecil (gempa vulkanik) dari dalam gunung.",
+      "<strong>Suara Gemuruh & Asap Tebal:</strong> Terdengar suara gemuruh dan asap kawah makin tebal.",
+      "<strong>Hewan Turun Gunung:</strong> Hewan-hewan liar seperti kera dan burung turun menuju permukiman warga."
+    ],
+    questions: [
+      {
+        type: "mcq",
+        pts: 10,
+        question: "Manakah yang merupakan tanda-tanda gunung berapi akan meletus?",
+        options: [
+          "Suhu sekitar menjadi sangat dingin dan turun salju",
+          "Terdengar suara gemuruh dan hewan-hewan turun gunung",
+          "Mata air meluap dengan air yang sangat jernih",
+          "Tidak ada angin dan langit cerah sepanjang hari"
+        ],
+        answer: 1,
+        explanation: "Benar! Hewan memiliki insting tajam merasakan panas dan getaran sehingga mereka turun gunung."
+      },
+      {
+        type: "tf",
+        pts: 10,
+        question: "Benar atau Salah: Sebelum gunung meletus, mata air di lereng gunung sering mengering karena suhu tanah meningkat.",
+        options: ["✅ Benar", "❌ Salah"],
+        answer: 0,
+        explanation: "Tepat sekali! Panas dari magma yang naik membuat air tanah menguap dan mengering."
+      }
+    ]
+  },
+  {
+    id: 4,
+    title: "Bahaya di Sekitar Kita",
+    icon: "⚠️",
+    visualSVG: `
+      <svg viewBox="0 0 320 230" width="100%" height="220">
+        <polygon points="60,210 140,80 180,80 260,210" fill="#4E342E"/>
+        <circle cx="135" cy="50" r="24" fill="#616161"/>
+        <circle cx="165" cy="40" r="28" fill="#757575"/>
+        <circle cx="195" cy="55" r="22" fill="#424242"/>
+        <circle cx="105" cy="45" r="6" fill="#FF3D00"/>
+        <circle cx="215" cy="40" r="7" fill="#FF6D00"/>
+        <path d="M140 85 Q95 110 75 150 Q100 155 125 125 Z" fill="#BDBDBD" opacity="0.9"/>
+        <path d="M180 85 Q210 145 255 210 L230 210 Q190 150 172 90 Z" fill="#FF6F00"/>
+        <text x="15" y="135" font-size="11" font-weight="bold" fill="#37474F">🌫️ Awan Panas</text>
+        <text x="200" y="30" font-size="11" font-weight="bold" fill="#D84315">🪨 Batu Pijar</text>
+        <text x="225" y="175" font-size="11" font-weight="bold" fill="#E65100">🌊 Aliran Lahar</text>
+      </svg>`,
+    points: [
+      "<strong>Abu Vulkanik:</strong> Serbuk halus yang mengganggu pernapasan dan merusak pandangan.",
+      "<strong>Awan Panas (Wedhus Gembel):</strong> Gulungan awan bersuhu ratusan derajat yang meluncur sangat cepat menuruni lereng.",
+      "<strong>Lava & Bebatuan Pijar:</strong> Lelehan panas dan lontaran batu yang membakar apa saja yang dilewatinya.",
+      "<strong>Lahar:</strong> Aliran lava yang bercampur air hujan, lumpur, dan batu di aliran sungai."
+    ],
+    questions: [
+      {
+        type: "match",
+        pts: 10,
+        question: "Cocokkan bahaya letusan gunung berapi dengan dampaknya!",
+        pairs: [
+          { left: "😷 Abu Vulkanik", right: "Mengganggu pernapasan & mata" },
+          { left: "🌫️ Awan Panas", right: "Awan bersuhu tinggi meluncur cepat" },
+          { left: "🌊 Lahar", right: "Campuran lava, lumpur, dan air hujan" }
+        ],
+        explanation: "Hebat! Kamu mengenali semua bahaya letusan gunung berapi dengan tepat!"
+      },
+      {
+        type: "mcq",
+        pts: 10,
+        question: "Aliran lumpur panas atau dingin yang merupakan campuran material letusan dengan air hujan di sungai disebut...",
+        options: ["Lahar", "Embun", "Kabut", "Ombak"],
+        answer: 0,
+        explanation: "Betul! Saat hujan turun di puncak gunung setelah letusan, abu dan batu terbawa air menjadi banjir lahar."
+      }
+    ]
+  },
+  {
+    id: 5,
+    title: "Ayo Selamatkan Diri",
+    icon: "🎒",
+    visualSVG: `
+      <svg viewBox="0 0 320 230" width="100%" height="220">
+        <rect x="45" y="65" width="85" height="105" rx="20" fill="#FF5722" stroke="#BF360C" stroke-width="4"/>
+        <path d="M70 65 Q87 40 105 65" fill="none" stroke="#BF360C" stroke-width="6"/>
+        <rect x="62" y="105" width="50" height="45" rx="10" fill="#FF8A65"/>
+        <text x="74" y="135" font-size="22">➕</text>
+        <text x="38" y="192" font-size="12" font-weight="bold" fill="#D84315">🎒 Tas Siaga</text>
+        <rect x="180" y="60" width="105" height="65" rx="10" fill="#2E7D32" stroke="#1B5E20" stroke-width="3"/>
+        <text x="193" y="88" font-size="13" font-weight="bold" fill="#FFF">🏃 JALUR</text>
+        <text x="193" y="108" font-size="13" font-weight="bold" fill="#FFF">EVAKUASI ➡️</text>
+        <rect x="228" y="125" width="8" height="65" fill="#5D4037"/>
+        <text x="180" y="205" font-size="12" font-weight="bold" fill="#1B5E20">😷 Pakai Masker & Kacamata</text>
+      </svg>`,
+    points: [
+      "<strong>Sebelum Meletus:</strong> Siapkan <em>Tas Siaga Bencana</em> (masker, air minum, makanan, senter, kotak P3K) dan kenali jalur evakuasi.",
+      "<strong>Saat Meletus:</strong> Segera mengungsi mengikuti jalur evakuasi ke tempat aman, jauhi aliran sungai, serta gunakan masker dan kacamata.",
+      "<strong>Setelah Meletus:</strong> Tetap di pengungsian sampai dinyatakan aman oleh petugas, dan bersihkan atap rumah dari abu vulkanik."
+    ],
+    questions: [
+      {
+        type: "bag",
+        pts: 10,
+        question: "Pilih 4 barang PENTING yang harus dimasukkan ke dalam Tas Siaga Bencana! (Klik 4 barang yang tepat)",
+        items: [
+          { icon: "😷", name: "Masker & Kacamata", good: true },
+          { icon: "🎮", name: "Konsol Game", good: false },
+          { icon: "🔦", name: "Senter & Baterai", good: true },
+          { icon: "🩹", name: "Kotak P3K & Obat", good: true },
+          { icon: "🧸", name: "Boneka Besar", good: false },
+          { icon: "💧", name: "Air Minum & Makanan", good: true },
+          { icon: "🛹", name: "Papan Luncur", good: false },
+          { icon: "🎨", name: "Cat Air", good: false }
+        ],
+        explanation: "Keren! Masker, senter, P3K, dan air minum sangat penting untuk keselamatan saat mengungsi!"
+      },
+      {
+        type: "mcq",
+        pts: 10,
+        question: "Saat terjadi hujan abu vulkanik dan status gunung AWAS, tindakan yang paling tepat adalah...",
+        options: [
+          "Pergi ke tepi sungai untuk melihat aliran lahar dari dekat",
+          "Menggunakan masker, kacamata, dan segera mengikuti jalur evakuasi",
+          "Bermain di halaman rumah tanpa pelindung",
+          "Berdiam diri di dekat puncak gunung"
+        ],
+        answer: 1,
+        explanation: "Tepat sekali! Keselamatan diri adalah yang utama. Selalu ikuti arahan petugas evakuasi."
+      }
+    ]
+  }
+];
+
+// ================= STATE PERMAINAN =================
+let studentData = {
+  name: "Rahmah Fauziyah",
+  className: "",
+  absen: ""
+};
+let missionScores = [0, 0, 0, 0, 0];
+let missionCompleted = [false, false, false, false, false];
+let currentMissionIdx = 0;
+let currentQIdx = 0;
+let currentMissionTempScore = 0;
+
+let selectedLeft = null;
+let matchedCount = 0;
+let bagPickedCount = 0;
+
+document.getElementById('map-bara-icon').innerHTML = getBaraSVG('happy');
+document.getElementById('quiz-bara-icon').innerHTML = getBaraSVG('happy');
+
+function goScreen(screenId) {
+  sfxClick();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  if (screenId === 'screen-map') renderMissionMap();
+}
+
+function toggleHelp(show) {
+  sfxClick();
+  document.getElementById('help-modal').classList.toggle('active', show);
+}
+
+function startGame() {
+  const nameVal = document.getElementById('student-name').value.trim();
+  const classVal = document.getElementById('student-class').value;
+  const absenVal = document.getElementById('student-absen').value.trim();
+  const codeVal = document.getElementById('access-code').value.trim().toUpperCase();
+  const errEl = document.getElementById('form-error');
+
+  if (!nameVal || !classVal || !absenVal || !codeVal) {
+    sfxWrong();
+    errEl.textContent = "⚠️ Mohon lengkapi Nama Lengkap, Kelas, Nomor Absen, dan Kode Akses dari Guru!";
+    errEl.classList.add('show');
+    return;
+  }
+
+  if (!VALID_ACCESS_CODES.includes(codeVal)) {
+    sfxWrong();
+    errEl.textContent = "❌ Kode Akses dari Guru tidak sesuai! Masukkan kode akses: ipas5.";
+    errEl.classList.add('show');
+    return;
+  }
+
+  errEl.classList.remove('show');
+  studentData = { name: nameVal, className: classVal, absen: absenVal };
+
+  document.getElementById('hud-name').textContent = studentData.name;
+  document.getElementById('hud-class-absen').style.display = 'flex';
+  document.getElementById('hud-info').textContent = `${studentData.className} • Absen ${studentData.absen}`;
+
+  goScreen('screen-map');
+}
+
+function updateTotalHUD() {
+  const total = missionScores.reduce((a, b) => a + b, 0);
+  document.getElementById('hud-score').textContent = total;
+}
+
+function renderMissionMap() {
+  const container = document.getElementById('mission-cards-container');
+  container.innerHTML = '';
+
+  const doneCount = missionCompleted.filter(Boolean).length;
+  document.getElementById('progress-text').textContent = `${doneCount} / 5 Selesai`;
+  document.getElementById('btn-to-cert').disabled = doneCount < 5;
+
+  if (doneCount === 5) {
+    document.getElementById('map-dialogue').innerHTML = `🎉 <strong>Luar biasa, ${studentData.name}!</strong> Semua 5 Misi telah selesai! Klik tombol <strong>Lihat Sertifikat</strong> di bawah!`;
+  } else {
+    document.getElementById('map-dialogue').innerHTML = `Ayo <strong>${studentData.name}</strong>! Klik kartu misi yang terbuka untuk memulai petualangan berikutnya!`;
+  }
+
+  missionsData.forEach((m, idx) => {
+    const isUnlocked = idx === 0 || missionCompleted[idx - 1] || missionCompleted[idx];
+    const isDone = missionCompleted[idx];
+
+    const card = document.createElement('div');
+    card.className = `mission-card ${isDone ? 'completed' : ''} ${!isUnlocked ? 'locked' : ''}`;
+    card.innerHTML = `
+      <div>
+        <div class="mission-num">MISI ${m.id}</div>
+        <div class="mission-icon">${isUnlocked ? m.icon : '🔒'}</div>
+        <div class="mission-title">${m.title}</div>
+      </div>
+      <div class="mission-score-tag">
+        ${isDone ? `✅ Poin: ${missionScores[idx]}/20` : isUnlocked ? '▶️ Siap Dimainkan' : 'Terkunci'}
+      </div>
+    `;
+
+    if (isUnlocked) {
+      card.onclick = () => openLesson(idx);
+    }
+    container.appendChild(card);
+  });
+}
+
+function openLesson(idx) {
+  currentMissionIdx = idx;
+  const m = missionsData[idx];
+  document.getElementById('lesson-badge').textContent = `MISI ${m.id} DARI 5`;
+  document.getElementById('lesson-title').textContent = m.title;
+  document.getElementById('lesson-visual').innerHTML = m.visualSVG;
+
+  const list = document.getElementById('lesson-points');
+  list.innerHTML = m.points.map(p => `<li>${p}</li>`).join('');
+
+  goScreen('screen-lesson');
+}
+
+function startMissionQuiz() {
+  currentQIdx = 0;
+  currentMissionTempScore = 0;
+  document.getElementById('mission-live-score').textContent = '0';
+  goScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const m = missionsData[currentMissionIdx];
+  const q = m.questions[currentQIdx];
+
+  document.getElementById('quiz-mission-label').textContent = `Misi ${m.id}: ${m.title} • Tantangan ${currentQIdx + 1}/${m.questions.length}`;
+  document.getElementById('quiz-question-text').textContent = q.question;
+  document.getElementById('quiz-bara-icon').innerHTML = getBaraSVG('happy');
+  document.getElementById('quiz-bara-msg').textContent = "Baca baik-baik ya, lalu pilih jawaban yang menurutmu paling tepat!";
+
+  const fb = document.getElementById('quiz-feedback');
+  fb.className = 'feedback-box';
+
+  const area = document.getElementById('quiz-interactive-area');
+  area.innerHTML = '';
+
+  if (q.type === 'mcq' || q.type === 'tf') {
+    const grid = document.createElement('div');
+    grid.className = 'options-grid';
+    const letters = ['A', 'B', 'C', 'D'];
+
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.innerHTML = `<span class="option-letter">${q.type === 'tf' ? '❓' : letters[i]}</span> <span>${opt}</span>`;
+      btn.onclick = () => handleChoiceAnswer(i, btn, grid, q.pts, q);
+      grid.appendChild(btn);
+    });
+    area.appendChild(grid);
+  }
+  else if (q.type === 'match') {
+    selectedLeft = null;
+    matchedCount = 0;
+    const board = document.createElement('div');
+    board.className = 'match-board';
+
+    const leftCol = document.createElement('div');
+    leftCol.className = 'match-col';
+    const rightCol = document.createElement('div');
+    rightCol.className = 'match-col';
+
+    const rightItems = q.pairs.map((p, idx) => ({ text: p.right, idx })).sort(() => Math.random() - 0.5);
+
+    q.pairs.forEach((p, idx) => {
+      const lBtn = document.createElement('div');
+      lBtn.className = 'match-item';
+      lBtn.textContent = p.left;
+      lBtn.dataset.idx = idx;
+      lBtn.onclick = () => {
+        if (lBtn.classList.contains('matched')) return;
+        sfxClick();
+        leftCol.querySelectorAll('.match-item').forEach(el => el.classList.remove('selected'));
+        lBtn.classList.add('selected');
+        selectedLeft = { idx, el: lBtn };
+      };
+      leftCol.appendChild(lBtn);
+    });
+
+    rightItems.forEach(item => {
+      const rBtn = document.createElement('div');
+      rBtn.className = 'match-item';
+      rBtn.textContent = item.text;
+      rBtn.onclick = () => {
+        if (rBtn.classList.contains('matched') || !selectedLeft) return;
+        if (selectedLeft.idx === item.idx) {
+          sfxCorrect();
+          selectedLeft.el.classList.remove('selected');
+          selectedLeft.el.classList.add('matched');
+          rBtn.classList.add('matched');
+          selectedLeft = null;
+          matchedCount++;
+          if (matchedCount === q.pairs.length) {
+            addScore(q.pts);
+            showFeedback(true, q.explanation);
+          }
+        } else {
+          sfxWrong();
+          document.getElementById('quiz-bara-icon').innerHTML = getBaraSVG('surprised');
+          document.getElementById('quiz-bara-msg').textContent = "Ups, pasangan itu belum cocok! Coba pilih pasangan lainnya ya!";
+        }
+      };
+      rightCol.appendChild(rBtn);
+    });
+
+    board.appendChild(leftCol);
+    board.appendChild(rightCol);
+    area.appendChild(board);
+  }
+  else if (q.type === 'bag') {
+    bagPickedCount = 0;
+    const grid = document.createElement('div');
+    grid.className = 'bag-grid';
+
+    q.items.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'bag-item';
+      card.innerHTML = `<div style="font-size: 2.1rem; margin-bottom: 4px;">${item.icon}</div><div style="font-weight: 800; font-size: 0.92rem;">${item.name}</div>`;
+      card.onclick = () => {
+        if (card.classList.contains('picked-good') || card.classList.contains('picked-bad') || bagPickedCount >= 4) return;
+        if (item.good) {
+          sfxCorrect();
+          card.classList.add('picked-good');
+          bagPickedCount++;
+          document.getElementById('quiz-bara-msg').textContent = `Bagus! ${item.name} masuk tas darurat! (${bagPickedCount}/4 barang terpilih)`;
+          if (bagPickedCount === 4) {
+            addScore(q.pts);
+            showFeedback(true, q.explanation);
+          }
+        } else {
+          sfxWrong();
+          card.classList.add('picked-bad');
+          document.getElementById('quiz-bara-icon').innerHTML = getBaraSVG('sad');
+          document.getElementById('quiz-bara-msg').textContent = `Kurang tepat! ${item.name} tidak mendesak saat darurat bencana. Pilih barang penyelamat ya!`;
+        }
+      };
+      grid.appendChild(card);
+    });
+    area.appendChild(grid);
+  }
+}
+
+function handleChoiceAnswer(selectedIdx, btn, grid, pts, q) {
+  const buttons = grid.querySelectorAll('.option-btn');
+  buttons.forEach(b => b.disabled = true);
+
+  if (selectedIdx === q.answer) {
+    sfxCorrect();
+    btn.classList.add('correct');
+    addScore(pts);
+    showFeedback(true, q.explanation);
+  } else {
+    sfxWrong();
+    btn.classList.add('wrong');
+    buttons[q.answer].classList.add('correct');
+    showFeedback(false, `Kurang tepat. ${q.explanation}`);
+  }
+}
+
+function addScore(pts) {
+  currentMissionTempScore += pts;
+  document.getElementById('mission-live-score').textContent = currentMissionTempScore;
+}
+
+function showFeedback(isCorrect, text) {
+  const fb = document.getElementById('quiz-feedback');
+  fb.className = `feedback-box show ${isCorrect ? 'good' : 'bad'}`;
+  document.getElementById('feedback-text').innerHTML = `${isCorrect ? '🎉 Hebat!' : '💡 Info Si Bara:'} ${text}`;
+  document.getElementById('quiz-bara-icon').innerHTML = getBaraSVG(isCorrect ? 'happy' : 'surprised');
+  document.getElementById('quiz-bara-msg').textContent = isCorrect
+    ? "Keren sekali! Jawabanmu benar!"
+    : "Tidak apa-apa, belajar dari kesalahan membuatmu makin pintar!";
+
+  const isLastQ = currentQIdx === missionsData[currentMissionIdx].questions.length - 1;
+  document.getElementById('btn-next-question').textContent = isLastQ ? '🏁 Selesaikan Misi!' : 'Lanjut ➡️';
+}
+
+function nextQuestion() {
+  sfxClick();
+  const m = missionsData[currentMissionIdx];
+  if (currentQIdx < m.questions.length - 1) {
+    currentQIdx++;
+    renderQuestion();
+  } else {
+    sfxWin();
+    missionCompleted[currentMissionIdx] = true;
+    if (currentMissionTempScore > missionScores[currentMissionIdx]) {
+      missionScores[currentMissionIdx] = currentMissionTempScore;
+    }
+    updateTotalHUD();
+
+    if (missionCompleted.every(Boolean)) {
+      showCertificate();
+    } else {
+      goScreen('screen-map');
+    }
+  }
+}
+
+function showCertificate() {
+  sfxWin();
+  const total = missionScores.reduce((a, b) => a + b, 0);
+  document.getElementById('cert-player-name').textContent = studentData.name;
+  document.getElementById('cert-student-meta').textContent = `${studentData.className} • No. Absen ${studentData.absen}`;
+  document.getElementById('cert-total-score').textContent = total;
+
+  let stars = "⭐⭐⭐⭐⭐";
+  let rank = "Pahlawan Siaga Utama";
+  if (total < 60) { stars = "⭐⭐⭐"; rank = "Penjelajah Siaga Muda"; }
+  else if (total < 85) { stars = "⭐⭐⭐⭐"; rank = "Penjelajah Siaga Hebat"; }
+
+  document.getElementById('cert-stars').textContent = stars;
+  document.getElementById('cert-rank').textContent = rank;
+  goScreen('screen-certificate');
+}
+
+function resetGame() {
+  missionScores = [0, 0, 0, 0, 0];
+  missionCompleted = [false, false, false, false, false];
+  updateTotalHUD();
+  goScreen('screen-home');
+}
+</script>
+</body>
+</html>
